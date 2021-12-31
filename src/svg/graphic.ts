@@ -284,6 +284,7 @@ class SVGPathRebuilder implements PathRebuilder {
 interface PathWithSVGBuildPath extends Path {
     __svgPathVersion: number
     __svgPathBuilder: SVGPathRebuilder
+    __svgPathStrokePercent: number
 }
 
 const svgPath: SVGProxy<Path> = {
@@ -310,7 +311,8 @@ const svgPath: SVGProxy<Path> = {
         const pathVersion = path.getVersion();
         const elExt = el as PathWithSVGBuildPath;
         let svgPathBuilder = elExt.__svgPathBuilder;
-        if (elExt.__svgPathVersion !== pathVersion || !svgPathBuilder || el.style.strokePercent < 1) {
+        if (elExt.__svgPathVersion !== pathVersion || !svgPathBuilder
+          || el.style.strokePercent !== elExt.__svgPathStrokePercent) {
             if (!svgPathBuilder) {
                 svgPathBuilder = elExt.__svgPathBuilder = new SVGPathRebuilder();
             }
@@ -318,6 +320,7 @@ const svgPath: SVGProxy<Path> = {
             path.rebuildPath(svgPathBuilder, el.style.strokePercent);
             svgPathBuilder.generateStr();
             elExt.__svgPathVersion = pathVersion;
+            elExt.__svgPathStrokePercent = el.style.strokePercent;
         }
 
         attr(svgEl, 'd', svgPathBuilder.getStr());
